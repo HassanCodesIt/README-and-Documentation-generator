@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# Exceptions (files to track)
+!index.html
+!main.py
+!requirements.txt
+!store.txt
+!.gitignore

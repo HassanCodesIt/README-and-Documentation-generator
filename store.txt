@@ -1,0 +1,67 @@
+FILE: main.py
+
+TECH STACK USED:
+- FastAPI
+- Pydantic
+
+WORKING / LOGIC SUMMARY:
+- The code defines a simple TODO List API using FastAPI, allowing clients to create, read, update, and delete (CRUD) TODO items.
+- The TODO items are stored in an in-memory list, meaning that the data will be lost when the application restarts.
+
+IMPORTANT FUNCTIONS:
+- read_root: Returns a welcome message for the TODO List API
+- get_todos: Returns a list of all TODO items
+- get_todo: Returns a specific TODO item by ID
+- create_todo: Creates a new TODO item and adds it to the list
+- update_todo: Updates a specific TODO item
+- delete_todo: Deletes a specific TODO item
+
+IMPORTANT CLASSES:
+- TodoItem: A Pydantic model representing a TODO item with attributes id, title, description, and completed
+
+ENDPOINTS:
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | / | Returns a welcome message |
+| GET | /todos | Returns a list of all TODO items |
+| GET | /todos/{todo_id} | Returns a specific TODO item by ID |
+| POST | /todos | Creates a new TODO item |
+| PUT | /todos/{todo_id} | Updates a specific TODO item |
+| DELETE | /todos/{todo_id} | Deletes a specific TODO item |
+
+NOTES:
+- The API uses UUIDs to identify TODO items
+- The API raises a 404 error if a TODO item is not found
+- The API returns a 201 status code when a new TODO item is created
+- The API returns a 204 status code when a TODO item is deleted
+
+
+============================================================
+
+FILE: requirements.txt
+
+TECH STACK USED:
+- FastAPI
+- Uvicorn
+- Pydantic
+
+WORKING / LOGIC SUMMARY:
+- This file outlines the dependencies required for a project, specifically a FastAPI application, with Uvicorn as the ASGI server and Pydantic for data validation.
+
+IMPORTANT FUNCTIONS:
+- None
+
+IMPORTANT CLASSES:
+- None
+
+ENDPOINTS (if any):
+- None
+
+NOTES:
+- The file specifies the exact versions of the dependencies to ensure reproducibility and consistency across different environments.
+
+RULES COMPLIANCE: The output only extracts information from the provided file, without adding any external knowledge.
+
+
+============================================================
+
