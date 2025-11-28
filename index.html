@@ -199,6 +199,200 @@
         hideLoader();
         stopProgressTracking();
 
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f6;
+      padding: 40px;
+    }
+
+    .card {
+      background: #fff;
+      max-width: 900px;
+      margin: auto;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    input[type=file] {
+      width: 100%;
+    }
+
+    button {
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 15px;
+    }
+
+    #uploadBtn {
+      background: #007bff;
+    }
+
+    #generateBtn {
+      background: #6f42c1;
+    }
+
+    #generateDocsBtn {
+      background: #28a745;
+    }
+
+    #output {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      background: #f9fafb;
+      border-left: 5px solid #007bff;
+      white-space: pre-line;
+      font-size: 15px;
+    }
+
+    .loader {
+      display: none;
+      font-size: 16px;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #444;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.4
+      }
+
+      50% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0.4
+      }
+    }
+
+    .success {
+      background: #e8fff1 !important;
+      border-left: 5px solid #28a745 !important;
+    }
+
+    .error {
+      background: #fff3f3 !important;
+      border-left: 5px solid #dc3545 !important;
+    }
+
+    .progress-box {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 14px;
+      background: #fff8e1;
+      border-left: 4px solid #ffa000;
+      border-radius: 6px;
+      display: none;
+    }
+  </style>
+  </head>
+
+  <body>
+    <div class="card markdown-body">
+      <h1>📄 README Generator</h1>
+      <p>Select your project folder (choose all files inside it).</p>
+
+      <input id="fileInput" type="file" webkitdirectory directory multiple />
+      <br><br>
+
+      <button id="uploadBtn" onclick="uploadFiles()">Upload Files</button>
+      <button id="generateBtn" onclick="generateReadme()" disabled>Generate README</button>
+      <button id="generateDocsBtn" onclick="generateDocs()" disabled>Generate Documentation</button>
+
+      <div class="loader" id="loader">⏳ Processing...</div>
+
+      <div id="progressBox" class="progress-box"></div>
+
+      <div id="output">Waiting...</div>
+    </div>
+
+    <script>
+    function showLoader(msg = "Processing...") {
+      const loader = document.getElementById("loader");
+      loader.innerText = "⏳ " + msg;
+      loader.style.display = "block";
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
+    }
+
+    function updateOutput(msg, type = "info") {
+      const out = document.getElementById("output");
+      out.innerText = msg;
+
+      out.className = "";
+      if (type === "success") out.classList.add("success");
+      if (type === "error") out.classList.add("error");
+    }
+
+    function startProgressTracking() {
+      const box = document.getElementById("progressBox");
+      box.style.display = "block";
+      box.innerText = "Processing files...";
+    }
+
+    function stopProgressTracking() {
+      const box = document.getElementById("progressBox");
+      box.style.display = "none";
+    }
+
+    // --------------------- UPLOAD + AUTO LLM ---------------------
+    async function uploadFiles() {
+      const files = document.getElementById("fileInput").files;
+      if (!files.length) {
+        alert("Select files first");
+        return;
+      }
+
+      updateOutput("Uploading files...", "info");
+      showLoader("Uploading project files...");
+      startProgressTracking();
+
+      document.getElementById("uploadBtn").disabled = true;
+      document.getElementById("generateBtn").disabled = true;
+
+      const fd = new FormData();
+      for (const f of files) fd.append("files", f);
+
+      const res = await fetch("/save", { method: "POST", body: fd });
+      const data = await res.json();
+
+      if (data.status === "saved") {
+        updateOutput("Files uploaded. Starting analysis...", "info");
+        showLoader("Analyzing files...");
+
+        const llmRes = await fetch("/llm", { method: "POST" });
+        const llmData = await llmRes.json();
+
+        hideLoader();
+        stopProgressTracking();
+
+        if (llmData.summaries) {
+          updateOutput("✅ Analysis complete! You can now generate README or Documentation.", "success");
+          document.getElementById("generateBtn").disabled = false;
+          document.getElementById("generateDocsBtn").disabled = false;
+        } else {
+          updateOutput("❌ LLM failed: " + JSON.stringify(llmData), "error");
+          document.getElementById("uploadBtn").disabled = false;
+        }
+      } else {
+        hideLoader();
+        stopProgressTracking();
+
         updateOutput("❌ Upload failed: " + JSON.stringify(data), "error");
         document.getElementById("uploadBtn").disabled = false;
       }
@@ -223,6 +417,10 @@
       } else {
         updateOutput("❌ Failed: " + JSON.stringify(data), "error");
       }
+      
+      // Re-enable both buttons
+      document.getElementById("generateBtn").disabled = false;
+      document.getElementById("generateDocsBtn").disabled = false;
     }
 
     // --------------------- GENERATE DOCS ---------------------
@@ -244,8 +442,12 @@
       } else {
         updateOutput("❌ Failed: " + JSON.stringify(data), "error");
       }
+      
+      // Re-enable both buttons
+      document.getElementById("generateBtn").disabled = false;
+      document.getElementById("generateDocsBtn").disabled = false;
     }
-  </script>
-</body>
+    </script>
+  </body>
 
 </html>
