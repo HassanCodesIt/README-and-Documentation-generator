@@ -136,6 +136,10 @@
   </div>
 
   <script>
+    // Cache for generated content
+    let cachedReadme = null;
+    let cachedDocs = null;
+
     function showLoader(msg = "Processing...") {
       const loader = document.getElementById("loader");
       loader.innerText = "⏳ " + msg;
@@ -201,6 +205,12 @@
           updateOutput("✅ Analysis complete! You can now generate README or Documentation.", "success");
           document.getElementById("generateBtn").disabled = false;
           document.getElementById("generateDocsBtn").disabled = false;
+
+          // Clear cache when new files are uploaded
+          cachedReadme = null;
+          cachedDocs = null;
+          document.getElementById("downloadReadmeBtn").style.display = "none";
+          document.getElementById("downloadDocsBtn").style.display = "none";
         } else {
           updateOutput("❌ LLM failed: " + JSON.stringify(llmData), "error");
           document.getElementById("uploadBtn").disabled = false;
@@ -218,6 +228,17 @@
     async function generateReadme() {
       document.getElementById("generateBtn").disabled = true;
 
+      // Check if we have cached README
+      if (cachedReadme) {
+        updateOutput("README loaded from cache!", "success");
+        document.getElementById("output").innerHTML =
+          marked.parse("# 📘 README Preview\n\n" + cachedReadme);
+        document.getElementById("downloadReadmeBtn").style.display = "inline-block";
+        document.getElementById("generateBtn").disabled = false;
+        document.getElementById("generateDocsBtn").disabled = false;
+        return;
+      }
+
       updateOutput("Generating README...", "info");
       showLoader("Formatting README...");
 
@@ -227,6 +248,7 @@
       hideLoader();
 
       if (data.preview) {
+        cachedReadme = data.preview; // Cache the result
         updateOutput("README generated!", "success");
         document.getElementById("output").innerHTML =
           marked.parse("# 📘 README Preview\n\n" + data.preview);
@@ -246,6 +268,17 @@
     async function generateDocs() {
       document.getElementById("generateDocsBtn").disabled = true;
 
+      // Check if we have cached Documentation
+      if (cachedDocs) {
+        updateOutput("Documentation loaded from cache!", "success");
+        document.getElementById("output").innerHTML =
+          marked.parse("# 📙 Documentation Preview\n\n" + cachedDocs);
+        document.getElementById("downloadDocsBtn").style.display = "inline-block";
+        document.getElementById("generateBtn").disabled = false;
+        document.getElementById("generateDocsBtn").disabled = false;
+        return;
+      }
+
       updateOutput("Generating Professional Documentation...", "info");
       showLoader("Writing Documentation...");
 
@@ -255,6 +288,7 @@
       hideLoader();
 
       if (data.preview) {
+        cachedDocs = data.preview; // Cache the result
         updateOutput("Documentation generated!", "success");
         document.getElementById("output").innerHTML =
           marked.parse("# 📙 Documentation Preview\n\n" + data.preview);
