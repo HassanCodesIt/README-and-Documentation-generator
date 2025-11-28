@@ -126,8 +126,6 @@
   </div>
 
   <script>
-    let progressInterval = null;
-
     function showLoader(msg = "Processing...") {
       const loader = document.getElementById("loader");
       loader.innerText = "⏳ " + msg;
@@ -150,29 +148,12 @@
     function startProgressTracking() {
       const box = document.getElementById("progressBox");
       box.style.display = "block";
-
-      progressInterval = setInterval(async () => {
-        const res = await fetch("/llm_progress");
-        const data = await res.json();
-
-        if (data && data.status) {
-          box.innerText = data.status;
-
-          if (data.done) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-            return;
-          }
-        }
-      }, 700);
+      box.innerText = "Processing files...";
     }
 
     function stopProgressTracking() {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
-      document.getElementById("progressBox").style.display = "none";
+      const box = document.getElementById("progressBox");
+      box.style.display = "none";
     }
 
     // --------------------- UPLOAD + AUTO LLM ---------------------
