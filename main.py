@@ -292,3 +292,19 @@ async def generate_docs():
         f.write(docs_text)
 
     return {"status": "Documentation generated successfully", "preview": docs_text}
+
+
+@app.get("/download/{filename}")
+async def download_file(filename: str):
+    """Download README.md or DOCUMENTATION.md"""
+    if filename not in ["README.md", "DOCUMENTATION.md"]:
+        return {"error": "File not found"}
+    
+    if not os.path.exists(filename):
+        return {"error": f"{filename} has not been generated yet"}
+    
+    return FileResponse(
+        path=filename,
+        filename=filename,
+        media_type="text/markdown"
+    )
